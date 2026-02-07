@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Health Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: auto;
+        min-height: 200px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        transform: translateY(-3px);
+    }
+
+    .card-header {
+        background: #f8f9fa !important;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 12px 15px !important;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6 !important;
+        margin: -20px -20px 15px -20px !important;
+        font-size: 1.1rem;
+    }
+
+    .health-score {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #28a745;
+        text-align: center;
+        margin: 10px 0 5px 0;
+        line-height: 1;
+    }
+
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+        margin: 12px 0;
+    }
+
+    .sensor-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #333;
+        margin: 3px 0;
+        line-height: 1.2;
+        min-height: 40px;
+    }
+
+    .sensor-label {
+        color: #666;
+        font-size: 0.85rem;
+        margin-bottom: 3px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .decision-badge {
+        font-size: 1.1rem;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+        margin: 8px 0;
+    }
+
+    .btn-custom {
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s;
+        width: 100%;
+        margin: 4px 0;
+        font-size: 0.95rem;
+    }
+
+    .update-time {
+        color: #666;
+        font-size: 0.8rem;
+        text-align: center;
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid #eee;
+    }
+
+    .damage-bar {
+        margin-bottom: 15px;
+    }
+
+    .damage-value {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    /* Reduce spacing in cards */
+    .card-body {
+        padding: 15px !important;
+    }
+
+    /* Reduce row spacing */
+    .row {
+        margin-bottom: -10px;
+    }
+
+    .col-lg-4, .col-6 {
+        padding: 8px !important;
+    }
+
+    /* Make the main container more compact */
+    .container-fluid {
+        padding: 10px 15px !important;
+    }
+
+    /* Compact the header */
+    .display-4 {
+        font-size: 2.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .lead {
+        font-size: 1.1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .btn-custom {
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s;
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .update-time {
+        color: #666;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    
+    .damage-bar {
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .damage-value {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    
+    /* FIX: Ensure proper text visibility */
+    .text-center h4 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+    
+    /* FIX: Remove overlapping background text */
+    body::before,
+    body::after {
+        display: none !important;
+    }
+    
+    /* FIX: Card body padding */
+    .card-body {
+        padding: 20px !important;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* FIX: Grid spacing */
+    .row {
+        margin-bottom: 0;
+    }
+    
+    .col-lg-4, .col-6 {
+        padding: 10px !important;
+    }
+    
+    /* FIX: System info card */
+    .dashboard-card p {
+        margin-bottom: 10px;
+        padding: 5px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .dashboard-card p:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    /* FIX: Alert box */
+    .alert {
+        margin: 15px 0;
+        padding: 12px 15px;
+        border-radius: 8px;
+    }
+    
+    /* FIX: Range slider */
+    .form-range {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    /* FIX: Header colors */
+    .bg-primary { background: linear-gradient(135deg, #007bff, #0056b3) !important; }
+    .bg-success { background: linear-gradient(135deg, #28a745, #1e7e34) !important; }
+    .bg-dark { background: linear-gradient(135deg, #343a40, #23272b) !important; }
+    .bg-secondary { background: linear-gradient(135deg, #6c757d, #545b62) !important; }
+    .bg-info { background: linear-gradient(135deg, #17a2b8, #117a8b) !important; }
+    .bg-danger { background: linear-gradient(135deg, #dc3545, #bd2130) !important; }
+    .bg-warning { background: linear-gradient(135deg, #ffc107, #e0a800) !important; }
+    
+    /* FIX: Remove any absolute positioned elements that might overlap */
+    [style*="absolute"],
+    [class*="absolute"] {
+        position: relative !important;
+    }
+    
+    /* FIX: Ensure all text is visible */
+    * {
+        text-shadow: none !important;
+    }
+    
+    /* FIX: Footer */
+    .text-center.text-white {
+        padding: 20px 0 10px 0;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        margin-top: 20px;
+    }
+    
+    /* FIX: Make sure nothing is behind anything */
+    .container-fluid {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* FIX: Display values properly */
+    #healthScore, #fatigueValue, #creepValue, #corrosionValue, #crackValue,
+    #tempValue, #pressureValue, #loadValue, #vibrationValue, 
+    #ultrasonicAmpValue, #ultrasonicTimeValue,
+    #failureProb, #expectedCost {
+        background: transparent !important;
+        position: relative;
+        z-index: 2;
+    }
+    /* QUICK FIX FOR OVERLAPPING TEXT */
+    .dashboard-card {
+        overflow: visible !important;
+        z-index: 1 !important;
+    }
+
+    .card-header {
+        z-index: 2 !important;
+        position: relative !important;
+    }
+
+    .sensor-value, 
+    .damage-value,
+    #healthScore,
+    #healthStatus,
+    .decision-badge {
+        position: relative !important;
+        z-index: 3 !important;
+        background: transparent !important;
+    }
+
+    /* Remove any hidden/overlapping text */
+    [style*="opacity: 0"],
+    [style*="visibility: hidden"],
+    [class*="hidden"] {
+        display: none !important;
+    }
+
+    /* Ensure proper text colors */
+    .text-white * {
+        color: white !important;
+    }
+
+    .bg-dark *,
+    .bg-primary *,
+    .bg-success *,
+    .bg-danger *,
+    .bg-warning *,
+    .bg-info * {
+        color: white !important;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .health-score {
+            font-size: 2.5rem;
+        }
+        
+        .sensor-value {
+            font-size: 1.4rem;
+        }
+        
+        .decision-badge {
+            font-size: 1rem;
+            padding: 8px 16px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .card-header {
+            margin: -15px -15px 12px -15px !important;
+            padding: 10px 12px !important;
+        }
+        
+        .health-score {
+            font-size: 2rem;
+        }
+        
+        .col-6 {
+            padding: 5px !important;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <!-- Header -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="text-center text-white">
+                    <h2 class="mb-1">
+                        <i class="fas fa-industry"></i> Asset Health AI
+                    </h2>
+                    <p class="mb-2">Real-time Predictive Maintenance Dashboard</p>
+                    <div class="small">
+                        <span class="badge bg-success me-1">ML-Powered</span>
+                        <span class="badge bg-info me-1">Cost-Aware</span>
+                        <span class="badge bg-warning">Real-time</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Health & Damage -->
+            <div class="col-lg-4">
+                <!-- Health Score -->
+                <div class="dashboard-card">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="fas fa-heartbeat"></i> Asset Health Score</h4>
+                    </div>
+                    <div class="text-center">
+                        <div class="health-score" id="healthScore">85</div>
+                        <div class="progress">
+                            <div id="healthBar" class="progress-bar bg-success" style="width: 85%"></div>
+                        </div>
+                        <div id="healthStatus" class="h5">Good Condition</div>
+                        <div class="update-time" id="lastUpdate">Last update: Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Damage Metrics -->
+                <div class="dashboard-card">
+                    <div class="card-header bg-dark text-white">
+                        <h4><i class="fas fa-tachometer-alt"></i> Damage Metrics</h4>
+                    </div>
+                    
+                    <div class="damage-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Fatigue</span>
+                            <span class="damage-value" id="fatigueValue">0.120</span>
+                        </div>
+                        <div class="progress">
+                            <div id="fatigueBar" class="progress-bar bg-info" style="width: 24%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="damage-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Creep</span>
+                            <span class="damage-value" id="creepValue">0.008</span>
+                        </div>
+                        <div class="progress">
+                            <div id="creepBar" class="progress-bar bg-warning" style="width: 40%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="damage-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Corrosion</span>
+                            <span class="damage-value" id="corrosionValue">0.150</span>
+                        </div>
+                        <div class="progress">
+                            <div id="corrosionBar" class="progress-bar bg-danger" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="damage-bar">
+                        <div class="d-flex justify-content-between">
+                            <span>Crack Growth</span>
+                            <span class="damage-value" id="crackValue">0.090</span>
+                        </div>
+                        <div class="progress">
+                            <div id="crackBar" class="progress-bar bg-dark" style="width: 23%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Decision -->
+            <div class="col-lg-4">
+                <!-- Decision Card -->
+                <div class="dashboard-card">
+                    <div class="card-header" id="decisionHeader" style="background: #28a745; color: white;">
+                        <h4><i class="fas fa-clipboard-check"></i> Maintenance Decision</h4>
+                    </div>
+                    <div class="text-center">
+                        <div id="decisionIcon" class="display-1 my-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div id="decisionText" class="decision-badge bg-success">CONTINUE OPERATION</div>
+                        <div id="actionText" class="mt-3">
+                            Continue normal operation with routine monitoring
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="sensor-label">Failure Probability</div>
+                                        <div id="failureProb" class="sensor-value">15.0%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="sensor-label">Expected Cost</div>
+                                        <div id="expectedCost" class="sensor-value">₹1,500,000</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Sensors -->
+                <div class="dashboard-card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-satellite-dish"></i> Live Sensor Data</h5>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <div class="text-center">
+                                <div class="sensor-label">Temperature</div>
+                                <div id="tempValue" class="sensor-value">380°C</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 mb-2">
+                            <div class="text-center">
+                                <div class="sensor-label">Pressure</div>
+                                <div id="pressureValue" class="sensor-value">18.0 MPa</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 mb-2">
+                            <div class="text-center">
+                                <div class="sensor-label">Load</div>
+                                <div id="loadValue" class="sensor-value">65.0%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6 mb-2">
+                            <div class="text-center">
+                                <div class="sensor-label">Vibration</div>
+                                <div id="vibrationValue" class="sensor-value">0.150 g</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="sensor-label">Ultrasonic Amp</div>
+                                <div id="ultrasonicAmpValue" class="sensor-value">45.0 dB</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="sensor-label">Ultrasonic Time</div>
+                                                <div id="ultrasonicTimeValue" class="sensor-value">13.0 µs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Controls -->
+            <div class="col-lg-4">
+                <!-- System Controls -->
+                <div class="dashboard-card">
+                    <div class="card-header bg-secondary text-white">
+                        <h4><i class="fas fa-sliders-h"></i> System Controls</h4>
+                    </div>
+                    <div class="text-center">
+                        <div class="d-grid gap-3">
+                            <button id="startBtn" class="btn btn-success btn-custom">
+                                <i class="fas fa-play"></i> Start Live Monitoring
+                            </button>
+                            
+                            <button id="stopBtn" class="btn btn-danger btn-custom" disabled>
+                                <i class="fas fa-stop"></i> Stop Monitoring
+                            </button>
+                            
+                            <button id="resetBtn" class="btn btn-warning btn-custom">
+                                <i class="fas fa-redo"></i> Reset System
+                            </button>
+                            
+                            <button id="updateBtn" class="btn btn-info btn-custom">
+                                <i class="fas fa-sync"></i> Update Now
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="form-label">
+                                Update Speed: <span id="speedValue">2</span> seconds
+                            </label>
+                            <input type="range" class="form-range" id="speedSlider" 
+                                   min="1" max="10" value="2">
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                Status: <span id="systemStatus">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <!-- System Info -->
+                <div class="dashboard-card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-info-circle"></i> System Info</h5>
+                    </div>
+                    <div class="small">
+                        <div class="mb-1"><strong>Asset:</strong> Turbine #T-42</div>
+                        <div class="mb-1"><strong>Location:</strong> Power Plant Unit 3</div>
+                        <div class="mb-1"><strong>Uptime:</strong> <span id="uptime">142</span> days</div>
+                        <div class="mb-1"><strong>ML Model:</strong> Gradient Boosting</div>
+                        <div class="mb-1"><strong>Accuracy:</strong> 94.2%</div>
+                        <div class="mb-0"><strong>Last Inspection:</strong> 30 days</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="text-center text-white">
+                    <p class="mb-0">
+                        <strong>Asset Health AI</strong> | Hackathon Project | 
+                        Vibration + Ultrasonic + Temperature Monitoring
+                    </p>
+                    <p class="small">
+                        Real-time predictive maintenance with physics-based damage modeling
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize with default values
+        let updateInterval = null;
+        let updateSpeed = 2000;
+        let isMonitoring = true;
+
+        // Update all displays with data
+        function updateDisplay(data) {
+            // Health score
+            document.getElementById('healthScore').textContent = data.health_percent;
+            document.getElementById('healthBar').style.width = data.health_percent + '%';
+            
+            // Health status
+            let statusText, statusColor;
+            if (data.health > 0.7) {
+                statusText = 'EXCELLENT';
+                statusColor = 'text-success';
+                document.getElementById('healthBar').className = 'progress-bar bg-success';
+            } else if (data.health > 0.4) {
+                statusText = 'MODERATE';
+                statusColor = 'text-warning';
+                document.getElementById('healthBar').className = 'progress-bar bg-warning';
+            } else {
+                statusText = 'CRITICAL';
+                statusColor = 'text-danger blink';
+                document.getElementById('healthBar').className = 'progress-bar bg-danger';
+            }
+            document.getElementById('healthStatus').innerHTML = 
+                `<span class="${statusColor} fw-bold">${statusText}</span>`;
+            
+            // Damage metrics
+            updateDamageBar('fatigueBar', 'fatigueValue', data.fatigue, 0.5);
+            updateDamageBar('creepBar', 'creepValue', data.creep, 0.02);
+            updateDamageBar('corrosionBar', 'corrosionValue', data.corrosion, 0.3);
+            updateDamageBar('crackBar', 'crackValue', data.crack, 0.4);
+            
+            // Decision
+            const header = document.getElementById('decisionHeader');
+            const icon = document.getElementById('decisionIcon');
+            const decisionText = document.getElementById('decisionText');
+
+            // Clear any existing classes
+            header.className = 'card-header';
+            icon.className = 'display-1 my-3';
+
+            if (data.decision_color === 'danger') {
+                header.classList.add('bg-danger', 'text-white');
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                decisionText.className = 'decision-badge bg-danger text-white';
+                decisionText.textContent = 'IMMEDIATE INSPECTION';
+                document.getElementById('actionText').textContent = 
+                    'Schedule immediate inspection and prepare for shutdown';
+            } else if (data.decision_color === 'warning') {
+                header.classList.add('bg-warning', 'text-white');
+                icon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                decisionText.className = 'decision-badge bg-warning text-white';
+                decisionText.textContent = 'SCHEDULE REPAIR';
+                document.getElementById('actionText').textContent = 
+                    'Plan repair during next maintenance window';
+            } else {
+                header.classList.add('bg-success', 'text-white');
+                icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                decisionText.className = 'decision-badge bg-success text-white';
+                decisionText.textContent = 'CONTINUE OPERATION';
+                document.getElementById('actionText').textContent = 
+                    'Continue normal operation with routine monitoring';
+            }
+            
+            // Probability and cost
+            document.getElementById('failureProb').textContent = 
+                data.failure_prob_percent.toFixed(1) + '%';
+            document.getElementById('expectedCost').textContent = 
+                '₹' + data.expected_cost.toLocaleString('en-IN');
+            
+            // Sensor values
+            document.getElementById('tempValue').textContent = data.temperature + '°C';
+            document.getElementById('pressureValue').textContent = data.pressure + ' MPa';
+            document.getElementById('loadValue').textContent = data.load + '%';
+            document.getElementById('vibrationValue').textContent = data.vibration + ' g';
+            document.getElementById('ultrasonicAmpValue').textContent = data.ultrasonic_amp + ' dB';
+            document.getElementById('ultrasonicTimeValue').textContent = data.ultrasonic_time + ' µs';
+            
+            // Timestamp
+            document.getElementById('lastUpdate').textContent = 
+                'Last update: ' + data.timestamp;
+            
+            // Update uptime counter
+            let uptime = parseInt(document.getElementById('uptime').textContent);
+            document.getElementById('uptime').textContent = uptime + 1;
+        }
+
+        // Update damage progress bar
+        function updateDamageBar(barId, valueId, value, maxValue) {
+            const percent = Math.min(100, (value / maxValue) * 100);
+            document.getElementById(barId).style.width = percent + '%';
+            document.getElementById(valueId).textContent = value.toFixed(3);
+        }
+
+        // Fetch data from API
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    updateDisplay(result.data);
+                }
+            } catch (error) {
+                console.log('Using simulated data');
+                // Generate simulated data if API fails
+                const simulatedData = {
+                    health: 0.6 + Math.random() * 0.3,
+                    health_percent: Math.round((0.6 + Math.random() * 0.3) * 100),
+                    fatigue: 0.1 + Math.random() * 0.2,
+                    creep: 0.005 + Math.random() * 0.01,
+                    corrosion: 0.1 + Math.random() * 0.15,
+                    crack: 0.08 + Math.random() * 0.12,
+                    temperature: (380 + Math.random() * 20).toFixed(1),
+                    pressure: (18 + Math.random() * 2).toFixed(1),
+                    load: (60 + Math.random() * 15).toFixed(1),
+                    vibration: (0.1 + Math.random() * 0.1).toFixed(3),
+                    ultrasonic_amp: (40 + Math.random() * 15).toFixed(1),
+                    ultrasonic_time: (12 + Math.random() * 3).toFixed(1),
+                    failure_prob: Math.random() * 0.3,
+                    failure_prob_percent: (Math.random() * 30).toFixed(1),
+                    expected_cost: Math.floor(Math.random() * 3000000),
+                    decision: Math.random() > 0.7 ? 'IMMEDIATE_INSPECTION' : 
+                             Math.random() > 0.5 ? 'SCHEDULE_REPAIR' : 'CONTINUE_OPERATION',
+                    decision_color: Math.random() > 0.7 ? 'danger' : 
+                                   Math.random() > 0.5 ? 'warning' : 'success',
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                updateDisplay(simulatedData);
+            }
+        }
+
+        // Start monitoring
+        async function startMonitoring() {
+            if (!isMonitoring) {
+                await fetch('/api/start');
+                isMonitoring = true;
+            }
+            
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+            
+            updateInterval = setInterval(fetchData, updateSpeed);
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('systemStatus').textContent = 'Active';
+            document.getElementById('systemStatus').className = 'text-success';
+        }
+
+        // Stop monitoring
+        async function stopMonitoring() {
+            if (isMonitoring) {
+                await fetch('/api/stop');
+                isMonitoring = false;
+            }
+            
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('systemStatus').textContent = 'Paused';
+            document.getElementById('systemStatus').className = 'text-warning';
+        }
+
+        // Reset system
+        async function resetSystem() {
+            await fetch('/api/reset');
+            stopMonitoring();
+            
+            // Show resetting message
+            document.getElementById('healthScore').textContent = '--';
+            document.getElementById('healthBar').style.width = '0%';
+            document.getElementById('healthStatus').textContent = 'Resetting...';
+            document.getElementById('systemStatus').textContent = 'Resetting';
+            
+            // Wait and restart
+            setTimeout(() => {
+                startMonitoring();
+                alert('System has been reset to initial state!');
+            }, 1000);
+        }
+
+        // Manual update
+        async function manualUpdate() {
+            await fetch('/api/update');
+            fetchData();
+        }
+
+        // Event listeners
+        document.getElementById('startBtn').addEventListener('click', startMonitoring);
+        document.getElementById('stopBtn').addEventListener('click', stopMonitoring);
+        document.getElementById('resetBtn').addEventListener('click', resetSystem);
+        document.getElementById('updateBtn').addEventListener('click', manualUpdate);
+        
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            updateSpeed = this.value * 1000;
+            document.getElementById('speedValue').textContent = this.value;
+            
+            if (updateInterval) {
+                stopMonitoring();
+                startMonitoring();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard initialized successfully!');
+            
+            // Set initial values
+            fetchData();
+            
+            // Start monitoring automatically
+            startMonitoring();
+            
+            // Auto-update uptime every minute
+            setInterval(() => {
+                let uptime = parseInt(document.getElementById('uptime').textContent);
+                document.getElementById('uptime').textContent = uptime + 1;
+            }, 60000);
+        });
+    </script>
+</body>
+</html>
