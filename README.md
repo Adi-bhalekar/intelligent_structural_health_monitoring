@@ -96,6 +96,7 @@ Endpoint	Method	Description
 /api/stop	GET	Stop monitoring
 /api/reset	GET	Reset system
 /health	GET	System status
+
 🧪 Physics Model
 Our hybrid approach combines:
 
@@ -114,8 +115,8 @@ Condition	Action	Cost Consideration
 Health > 70%	Continue operation	Normal monitoring
 Health 40-70%	Schedule repair	Preventive cost < Failure cost
 Health < 40%	Immediate inspection	Risk mitigation
-🏆 Hackathon Features
-What Judges Should Notice:
+
+🏆 Hackathon Features:
 Hybrid Approach - Not just black-box ML
 
 Business Logic Integration - Cost-aware alerts
@@ -160,11 +161,12 @@ For questions or collaborations:
 
 GitHub Issues: Report here
 
-Email: your.email@example.com
+Email: adityabhalekar333@gmail.com
 
 <div align="center">
 Made with ❤️ for Hackathon 2026
 
 Predict Today, Prevent Tomorrow 🚀
+
 
 </div> ```
