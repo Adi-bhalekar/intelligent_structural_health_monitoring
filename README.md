@@ -8,7 +8,7 @@
 **Real-time industrial asset monitoring with vibration & ultrasonic sensors for predictive maintenance**
 
 ## 🚀 Live Demo
-👉 **[View Live Dashboard](https://asset-health-ai.onrender.com)** *(Deployed on Render.com)*
+👉 **[View Live Dashboard]([https://asset-health-ai.onrender.com](https://attached-assets--adityabhalekar3.replit.app))** *(Deployed on Replit.com)*
 
 ## 📊 Features
 
@@ -72,7 +72,7 @@ python app.py
 Deployment
 Push to GitHub
 
-Connect to Render.com
+Connect to Replit.com
 
 Automatic deployment
 
@@ -204,5 +204,6 @@ Email: adityabhalekar333@gmail.com
 Made with ❤️ for Hackathon 2026
 
 Predict Today, Prevent Tomorrow 🚀
+
 
 </div> ```
