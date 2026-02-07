@@ -8,7 +8,7 @@
 **Real-time industrial asset monitoring with vibration & ultrasonic sensors for predictive maintenance**
 
 ## 🚀 Live Demo
-👉 **[View Live Dashboard]([https://attached-assets--adityabhalekar3.replit.app])** *(Deployed on Replit.com)*
+👉 **([https://attached-assets--adityabhalekar3.replit.app]) *(Deployed on Replit.com)*
 
 ## 📊 Features
 
@@ -207,4 +207,5 @@ Predict Today, Prevent Tomorrow 🚀
 
 
 </div> ```
+
 
