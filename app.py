@@ -3,8 +3,9 @@ import random
 from datetime import datetime
 import threading
 import time
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # Global state
 class AssetState:
@@ -142,6 +143,26 @@ def reset():
         'message': 'System reset'
     })
 
+# Add a health check endpoint (REQUIRED for Render)
+@app.route('/health')
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "service": "Asset Health AI",
+        "version": "1.0.0",
+        "timestamp": datetime.now().isoformat(),
+        "environment": "production"
+    })
+
+# Add error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({"error": "Internal server error"}), 500
+
 # Background update thread
 def background_updater():
     """Background thread to update data periodically"""
@@ -155,14 +176,5 @@ thread = threading.Thread(target=background_updater, daemon=True)
 thread.start()
 
 if __name__ == '__main__':
-    print("=" * 50)
-    print("🚀 ASSET HEALTH DASHBOARD STARTING")
-    print("=" * 50)
-    print("📊 Dashboard will be available at:")
-    print("   http://localhost:5000")
-    print("   http://127.0.0.1:5000")
-    print("=" * 50)
-    print("Press Ctrl+C to stop")
-    print("=" * 50)
-    
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)  # debug MUST be False
